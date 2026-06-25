@@ -108,6 +108,7 @@ export default function SearchOpenTabs() {
             title={tab.name}
             subtitle={shortenPath(tab.folder)}
             icon={Icon.Document}
+            keywords={tab.name.split(/[_\-\s]+/)}
             actions={
               <ActionPanel>
                 <Action
