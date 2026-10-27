@@ -65,6 +65,7 @@ export function getCurrentPageNumber(filePath: string): number | null {
   try {
     const hex = execFileSync("xattr", ["-px", LAST_POSITION_XATTR, filePath], {
       encoding: "utf-8",
+      stdio: ["ignore", "pipe", "ignore"],
     });
     base64 = Buffer.from(hex.replace(/\s+/g, ""), "hex").toString("base64");
   } catch {
@@ -75,9 +76,12 @@ export function getCurrentPageNumber(filePath: string): number | null {
 ObjC.import("Foundation")
 function run(argv) {
   var data = $.NSData.alloc.initWithBase64EncodedStringOptions(argv[0], 0)
-  var unarchiver = $.NSKeyedUnarchiver.alloc.initForReadingFromDataError(data, $())
-  unarchiver.requiresSecureCoding = false
-  var root = unarchiver.decodeObjectForKey("root")
+  if (data.isNil()) return "null"
+  // Secure coding with an explicit allow-list: the xattr travels with the PDF, so treat it as untrusted.
+  var classes = $.NSSet.setWithArray($([$.NSDictionary.class, $.NSString.class, $.NSNumber.class]))
+  var error = Ref()
+  var root = $.NSKeyedUnarchiver.unarchivedObjectOfClassesFromDataError(classes, data, error)
+  if (root.isNil() || !root.isKindOfClass($.NSDictionary)) return "null"
   var page = root.objectForKey("pageNumber")
   return page.isNil() ? "null" : String(ObjC.unwrap(page))
 }`;

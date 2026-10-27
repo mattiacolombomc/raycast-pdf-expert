@@ -150,6 +150,15 @@ describe("getRecentDocuments", () => {
     expect(script).not.toContain("$(), $(), $()");
   });
 
+  it("decodes the SFL archive with secure coding and an explicit class allow-list", () => {
+    mockedExistsSync.mockReturnValue(true);
+    mockedExecFileSync.mockReturnValue("[]" as never);
+    getRecentDocuments();
+    const script = String(mockedExecFileSync.mock.calls[0][1]?.[3]);
+    expect(script).not.toContain("requiresSecureCoding = false");
+    expect(script).toContain("unarchivedObjectOfClassesFromDataError");
+  });
+
   it("returns empty array when SFL4 file does not exist", () => {
     mockedExistsSync.mockReturnValue(false);
     expect(getRecentDocuments()).toEqual([]);

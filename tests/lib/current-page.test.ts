@@ -111,6 +111,14 @@ describe("getCurrentPageNumber", () => {
     expect(args2).toContain("YnBsaXN0MDA=");
   });
 
+  it("decodes the archive with secure coding and an explicit class allow-list", () => {
+    mockedExecFileSync.mockReturnValueOnce("00\n" as never).mockReturnValueOnce("1\n" as never);
+    getCurrentPageNumber("/a/notes.pdf");
+    const script = String(mockedExecFileSync.mock.calls[1][1]?.[3]);
+    expect(script).not.toContain("requiresSecureCoding = false");
+    expect(script).toContain("unarchivedObjectOfClassesFromDataError");
+  });
+
   it("returns null when the file has no LastPosition xattr", () => {
     mockedExecFileSync.mockImplementation(() => {
       throw new Error("No such xattr");
