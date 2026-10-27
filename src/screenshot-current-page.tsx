@@ -7,10 +7,6 @@ import {
 } from "./lib/current-page";
 import { getOpenTabs, isInstalled, isRunning } from "./lib/pdf-expert";
 
-interface Preferences {
-  dpi: string;
-}
-
 export default async function ScreenshotCurrentPage() {
   if (!isInstalled()) {
     await showToast({
@@ -44,8 +40,17 @@ export default async function ScreenshotCurrentPage() {
     return;
   }
 
-  const page = getCurrentPageNumber(doc.path) ?? 1;
-  const dpi = Number(getPreferenceValues<Preferences>().dpi) || 216;
+  const page = getCurrentPageNumber(doc.path);
+  if (page === null) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Could not determine the current page",
+      message: "Scroll the document in PDF Expert and try again",
+    });
+    return;
+  }
+  const dpi =
+    Number(getPreferenceValues<Preferences.ScreenshotCurrentPage>().dpi) || 216;
 
   try {
     const info = copyPageImageToClipboard(doc.path, page, dpi);
