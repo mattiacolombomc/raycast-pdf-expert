@@ -79,8 +79,10 @@ if (!data || data.isEqualTo($()))  {
     var item = items.objectAtIndex(i)
     var bookmarkData = item.objectForKey("Bookmark")
     if (bookmarkData && !bookmarkData.isEqualTo($()))  {
+      var isStale = Ref()
+      var error = Ref()
       var url = $.NSURL.URLByResolvingBookmarkDataOptionsRelativeToURLBookmarkDataIsStaleError(
-        bookmarkData, 0x100, $(), $(), $()
+        bookmarkData, 0x100, $(), isStale, error
       )
       if (url && !url.isEqualTo($()))  {
         results.push(ObjC.unwrap(url.path))
